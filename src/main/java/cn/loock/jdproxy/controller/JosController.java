@@ -45,6 +45,22 @@ public class JosController extends BaseController {
     @Autowired
     private Config config;
 
+    /**
+     * {
+     * 	"requestName":"LasSpareZerostockHandleSearchRequest",
+     * 	"category":"HouseEI",
+     * 	"params":{
+     * 		"begin":"jingdong",
+     * 		"end":"end",
+     * 		"index":123,
+     * 		"vc":"vc",
+     * 		"token":"token"
+     *        }
+     * }
+     * category: com.jd.open.api.sdk.request 包下的子包
+     * @param jsonNode
+     * @return
+     */
     @RequestMapping(value = "/invoke", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseResult invoke(@RequestBody JsonNode jsonNode) {
         String className = getJsonString(jsonNode, "requestName", true);
