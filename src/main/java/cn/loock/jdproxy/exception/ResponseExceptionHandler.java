@@ -13,13 +13,6 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 
 import javax.servlet.http.HttpServletRequest;
 
-
-/**
- * Created with IntelliJ IDEA.
- * User: liudi
- * Date: 17/1/3
- * Time: 下午3:04
- */
 @EnableWebMvc
 @ControllerAdvice
 public class ResponseExceptionHandler extends ResponseEntityExceptionHandler {

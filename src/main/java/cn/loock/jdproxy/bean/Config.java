@@ -3,12 +3,6 @@ package cn.loock.jdproxy.bean;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
-/**
- * Created with IntelliJ IDEA.
- * User: ZhiyuanG
- * Date: 2018/7/22.
- * Time: 下午8:24
- */
 @Component
 @ConfigurationProperties("jos")
 public class Config {

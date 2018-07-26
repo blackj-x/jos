@@ -2,12 +2,6 @@ package cn.loock.jdproxy.exception;
 
 import org.springframework.http.HttpStatus;
 
-/**
- * Created with IntelliJ IDEA.
- * User: liudi
- * Date: 17/1/3
- * Time: 下午3:29
- */
 public class ErrorMessageUtil {
 
     //--400

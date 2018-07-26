@@ -17,12 +17,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Map;
 
-/**
- * Created with IntelliJ IDEA.
- * User: liudi
- * Date: 17/3/25
- * Time: 下午3:14
- */
+
 public class JsonUtil {
 
     private static Logger logger = LoggerFactory.getLogger(JsonUtil.class);

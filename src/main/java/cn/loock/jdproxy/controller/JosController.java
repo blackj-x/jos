@@ -5,6 +5,7 @@ import cn.loock.jdproxy.bean.ResponseResult;
 import cn.loock.jdproxy.exception.ErrorMessageUtil;
 import cn.loock.jdproxy.exception.IllegalRequestException;
 import cn.loock.jdproxy.service.ClassService;
+import cn.loock.jdproxy.service.OAuthService;
 import cn.loock.jdproxy.utils.JsonUtil;
 import cn.loock.jdproxy.utils.PackageUtil;
 import com.fasterxml.jackson.databind.JsonNode;
@@ -18,10 +19,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
@@ -45,19 +43,23 @@ public class JosController extends BaseController {
     @Autowired
     private Config config;
 
+    @Autowired
+    private OAuthService oAuthService;
+
     /**
      * {
-     * 	"requestName":"LasSpareZerostockHandleSearchRequest",
-     * 	"category":"HouseEI",
-     * 	"params":{
-     * 		"begin":"jingdong",
-     * 		"end":"end",
-     * 		"index":123,
-     * 		"vc":"vc",
-     * 		"token":"token"
-     *        }
+     * "requestName":"LasSpareZerostockHandleSearchRequest",
+     * "category":"HouseEI",
+     * "params":{
+     * "begin":"jingdong",
+     * "end":"end",
+     * "index":123,
+     * "vc":"vc",
+     * "token":"token"
+     * }
      * }
      * category: com.jd.open.api.sdk.request 包下的子包
+     *
      * @param jsonNode
      * @return
      */
@@ -67,7 +69,7 @@ public class JosController extends BaseController {
         String category = getJsonString(jsonNode, "category", true);
         JsonNode params = JsonUtil.getNode(jsonNode, "params", true);
         JdRequest instance = getJdRequest(category, className, params);
-
+        oAuthService.auth();
         JdClient client = new DefaultJdClient(config.getServerUrl(), config.getAccessToken(), config.getAppKey(), config.getAppSecret());
         AbstractResponse execute;
         try {
@@ -98,7 +100,7 @@ public class JosController extends BaseController {
         return instance;
     }
 
-    @RequestMapping(path = "/debug", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(value = "/debug", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseResult debug(@RequestBody JsonNode jsonNode) {
         String className = getJsonString(jsonNode, "requestName", true);
         String category = getJsonString(jsonNode, "category", true);
@@ -110,5 +112,11 @@ public class JosController extends BaseController {
         resultMap.put("request", instance);
         resultMap.put("classNames", classNames);
         return new ResponseResult(instance);
+    }
+
+    @RequestMapping("/oauth")
+    public ResponseResult oauth(@RequestParam(value = "code", required = false) String code, @RequestParam(value = "code", required = false) String state) {
+        oAuthService.getAccessToken(code);
+        return new ResponseResult();
     }
 }

@@ -10,7 +10,7 @@ public class IllegalRequestException extends RuntimeException {
         super(s);
     }
 
-    public IllegalRequestException(Exception e) {
+    public IllegalRequestException(String s, Exception e) {
         super(e);
     }
 }
