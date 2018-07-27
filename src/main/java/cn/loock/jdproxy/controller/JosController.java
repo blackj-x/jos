@@ -87,9 +87,16 @@ public class JosController extends BaseController {
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> next = it.next();
             String key = next.getKey();
-            Object value = next.getValue().textValue();
+            JsonNode value = next.getValue();
+            Object v = null;
+            if (value.isNumber()) {
+                v = value.asInt();
+            }
+            if (value.isTextual()) {
+                v = value.asText();
+            }
             try {
-                PropertyUtils.setProperty(instance, key, value);
+                PropertyUtils.setProperty(instance, key, v);
             } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 LOGGER.error("创建JDRequest失败", e);
                 throw new IllegalRequestException(ErrorMessageUtil.JD_CLIENT_REQUEST_CREATE_ERROR);
