@@ -69,7 +69,6 @@ public class JosController extends BaseController {
         String category = getJsonString(jsonNode, "category", true);
         JsonNode params = JsonUtil.getNode(jsonNode, "params", true);
         JdRequest instance = getJdRequest(category, className, params);
-        oAuthService.auth();
         JdClient client = new DefaultJdClient(config.getServerUrl(), config.getAccessToken(), config.getAppKey(), config.getAppSecret());
         AbstractResponse execute;
         try {
