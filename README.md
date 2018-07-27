@@ -5,7 +5,7 @@
 
 
 
-`打包`: mvn clean package spring-boot:repackage
+`打包`: mvn clean package
 
 `运行`: sudo -u tomcat nohup java -jar -Djava.io.tmpdir=/opt/ucenter/temp/ yl-tiger-ucenter.jar --spring.config.location=/opt/ucenter/config/application.yml &
 
