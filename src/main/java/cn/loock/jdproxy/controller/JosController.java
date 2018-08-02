@@ -15,6 +15,7 @@ import com.jd.open.api.sdk.JdException;
 import com.jd.open.api.sdk.request.JdRequest;
 import com.jd.open.api.sdk.response.AbstractResponse;
 import org.apache.commons.beanutils.PropertyUtils;
+import org.apache.commons.lang3.time.DateUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +23,8 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.text.ParseException;
+import java.util.*;
 
 /**
  * Created with IntelliJ IDEA.
@@ -48,16 +47,19 @@ public class JosController extends BaseController {
 
     /**
      * {
-     * "requestName":"LasSpareZerostockHandleSearchRequest",
-     * "category":"HouseEI",
-     * "params":{
-     * "begin":"jingdong",
-     * "end":"end",
-     * "index":123,
-     * "vc":"vc",
-     * "token":"token"
+     * 	"requestName":"LasImHfsAppointmentPushRequest",
+     * 	"category":"HouseEI",
+     * 	"params":{
+     * 		"ordNo":"010869920",
+     * 		"serProNo":"010869920",
+     * 		"opeT":"2012-12-12 12:12:12",
+     * 		"serDet":"test"
+     * 	},
+     * 	"types":{
+     * 		"date":["opeT"]
+     * 	}
      * }
-     * }
+     *
      * category: com.jd.open.api.sdk.request 包下的子包
      *
      * @param jsonNode
@@ -68,7 +70,8 @@ public class JosController extends BaseController {
         String className = getJsonString(jsonNode, "requestName", true);
         String category = getJsonString(jsonNode, "category", true);
         JsonNode params = JsonUtil.getNode(jsonNode, "params", true);
-        JdRequest instance = getJdRequest(category, className, params);
+        JsonNode types = JsonUtil.getNode(jsonNode, "types", true);
+        JdRequest instance = getJdRequest(category, className, params, types);
         JdClient client = new DefaultJdClient(config.getServerUrl(), config.getAccessToken(), config.getAppKey(), config.getAppSecret());
         AbstractResponse execute;
         try {
@@ -80,9 +83,16 @@ public class JosController extends BaseController {
         return new ResponseResult(execute);
     }
 
-    private JdRequest getJdRequest(String category, String className, JsonNode params) {
+    private JdRequest getJdRequest(String category, String className, JsonNode params, JsonNode types) {
         String forName = "com.jd.open.api.sdk.request." + category + "." + className;
         JdRequest instance = (JdRequest) classService.getInstance(forName);
+        JsonNode dateTypes = JsonUtil.asArray(types, "date", false);
+        Set<String> dataTypeSet = new HashSet<>();
+        if (dateTypes != null && !dateTypes.isNull()) {
+            for (JsonNode paramKey : dateTypes) {
+                dataTypeSet.add(paramKey.asText());
+            }
+        }
         Iterator<Map.Entry<String, JsonNode>> it = params.fields();
         while (it.hasNext()) {
             Map.Entry<String, JsonNode> next = it.next();
@@ -94,6 +104,16 @@ public class JosController extends BaseController {
             }
             if (value.isTextual()) {
                 v = value.asText();
+            }
+            if (value.isBoolean()) {
+                v = value.asBoolean();
+            }
+            if (dataTypeSet.contains(key)) {
+                try {
+                    v = DateUtils.parseDate(value.asText(), "yyyy-MM-dd HH:mm:ss");
+                } catch (ParseException e) {
+                    LOGGER.error("parseDate:{} error", value.asText());
+                }
             }
             try {
                 PropertyUtils.setProperty(instance, key, v);
@@ -111,7 +131,8 @@ public class JosController extends BaseController {
         String className = getJsonString(jsonNode, "requestName", true);
         String category = getJsonString(jsonNode, "category", true);
         JsonNode params = JsonUtil.getNode(jsonNode, "params", true);
-        JdRequest instance = getJdRequest(category, className, params);
+        JsonNode types = JsonUtil.getNode(jsonNode, "types", true);
+        JdRequest instance = getJdRequest(category, className, params, types);
         String packageName = "com.jd.open.api.sdk.request." + category;
         List<String> classNames = PackageUtil.getClassName(packageName);
         Map<String, Object> resultMap = new HashMap<>();
@@ -121,7 +142,7 @@ public class JosController extends BaseController {
     }
 
     @RequestMapping("/oauth")
-    public ResponseResult oauth(@RequestParam(value = "code", required = false) String code, @RequestParam(value = "code", required = false) String state) {
+    public ResponseResult oauth(@RequestParam(value = "code", required = false) String code, @RequestParam(value = "state", required = false) String state) {
         oAuthService.getAccessToken(code);
         return new ResponseResult();
     }
